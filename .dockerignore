@@ -1,44 +1,53 @@
-# Git
+# Version control
 .git
 .gitignore
 .gitattributes
 
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# Documentation
-README.md
-*.md
-
-# IDE
-.idea
+# IDE and editor files
 .vscode
+.idea
 *.swp
 *.swo
 *~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
 
-# Symfony
-var/
-vendor/
+# Documentation
+README.md
+docs/
+*.md
+
+# Development files
 node_modules/
-.env
+npm-debug.log
+yarn-error.log
 .env.local
 .env.*.local
 
-# Tests
+# Test files
 tests/
-phpunit.*
-.phpunit.result.cache
+phpunit.xml
+phpunit.dist.xml
+.phpunit.cache/
 
-# Logs
-*.log
+# Build and cache
+dist/
+build/
+.cache/
 
-# OS
-.DS_Store
-Thumbs.db
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
 
-# Temporary files
-tmp/
-temp/
+# Docker compose files (development only)
+docker-compose.override.yaml
+compose-disable.yaml
+compose.override-disable.yaml
+
+# Misc
+.editorconfig
+.gitpod.yml
+Makefile
