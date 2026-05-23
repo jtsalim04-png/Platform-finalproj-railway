@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
+    nodejs \
+    npm \
     && docker-php-ext-install pdo pdo_mysql \
-    && rm -rf /var/lib/apt/lists/* \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -17,21 +17,17 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 COPY composer.json composer.lock ./
 
-RUN composer install --no-interaction --no-scripts --optimize-autoloader --no-dev
+RUN composer install --no-interaction --no-scripts --optimize-autoloader
 
 COPY . .
 
+RUN if [ ! -f /app/.env ]; then echo "APP_ENV=${APP_ENV:-prod}\nAPP_DEBUG=${APP_DEBUG:-false}\nAPP_SECRET=${APP_SECRET:-ChangeMe}\n" > /app/.env; fi
 
-ENV APP_ENV=prod
-ENV APP_DEBUG=0
-
-RUN if [ ! -f /app/.env ]; then echo "APP_ENV=prod\nAPP_DEBUG=false\nAPP_SECRET=${APP_SECRET:-ChangeMe}\n" > /app/.env; fi
-
+# Now run post-install scripts after app code is available
+RUN composer install --no-interaction --optimize-autoloader --no-ansi || true
 RUN php bin/console importmap:install --no-interaction
 
-RUN php bin/console cache:warmup --env=prod --no-debug
-
-
+RUN php bin/console cache:warmup --env=prod --no-debug || true
 
 FROM php:8.3-fpm as runtime
 
@@ -51,6 +47,7 @@ RUN mkdir -p /app/var && \
     chmod -R 775 /app/var
 
 COPY nginx-main.conf /etc/nginx/nginx.conf
+
 RUN rm -rf /etc/nginx/conf.d/* /etc/nginx/sites-enabled /etc/nginx/sites-available
 COPY nginx.conf /etc/nginx/conf.d/symfony.conf
 
